@@ -1,0 +1,25 @@
+{
+ "name": "hyperv",
+ "types": ["pack"],
+ "version": "1.0",
+ "homepage": "https://github.com/ArthurHOUBART/pack_hyperv",
+ "repository": "https://github.com/ArthurHOUBART/pack_hyperv",
+ "author": "Arthur HOUBART",
+ "description": "Hyper-V check",
+ "contributors": [
+    {
+       "name": "Arthur HOUBART",
+       "email": "info@houbart-informatic.be"
+    }
+ ],
+ "repository": "",
+ "keywords": [
+    "pack",
+    "hyperv",
+    "hyper-v"
+ ],
+ "dependencies": {
+    "shinken": ">=1.4"
+ },
+ "license": "AGPL"
+}
