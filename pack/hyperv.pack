@@ -1,0 +1,14 @@
+{
+"name":"hyperv",
+
+"description":"Hyper-V checks. Checks are done by check_hyperv.pl (nagios plugin)",
+
+"macros":{
+         "_HYPERV_VOLUME_WARN": {"type":"percent",
+                             "description":"Warning level for disk space"
+                             },
+         "_HYPERV_VOLUME_CRIT": {"type":"percent",
+                             "description":"Critical level for disk space"
+                             }
+         }
+}
