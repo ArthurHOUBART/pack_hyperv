@@ -1,3 +1,4 @@
+
 #!/usr/bin/perl -w
 #
 # check_hyperv.pl - Nagios Plugin
@@ -6,7 +7,7 @@
 use strict;
 use Getopt::Long;
 use vars qw($PROGNAME);
-use lib "/usr/lib/nagios/plugins";
+use lib "/usr/lib/nagios/plugins"; # Pfad zur util.pm !!
 use utils qw ($TIMEOUT %ERRORS &print_revision &support);
 use List::MoreUtils qw(first_index);
 use String::Escape qw( printable unprintable );
@@ -16,6 +17,8 @@ sub print_usage ();
 
 my ($opt_V, $opt_h, $opt_m, $opt_H, $opt_u, $opt_p,  $opt_w, $opt_c, $opt_t, $opt_U, $opt_P);
 my ($ok, $anzeige, @anzeige, $on, $off, @onlineoffline, $onoff, $percent, @memoryresults, $memory, $list, $load, $output, @resultslist, @resultsload, @arguments, $message, $size, $size2, $critical, $warning);
+my ($osversion, @resultosversion);
+
 $PROGNAME="check_hyperv";
 
 
@@ -83,7 +86,7 @@ sub print_usage () {
 sub print_help () {
         print_usage();
         print "\n";
-        print "  <help>  Nagios Plugin for Hyper-V Application running on Windows Server 2008 R2\n\n\t\t-m\thyperv|volumes\n\t\t\tFor using the mode Volumes you have to specify thresholds!\n ";
+        print "  <help>  Nagios Plugin for Hyper-V Application running on Windows Server\n\n\t\t-m\thyperv|volumes\n\t\t\tFor using the mode Volumes you have to specify thresholds!\n ";
         print "\n";
 #        support();
 }
@@ -100,17 +103,29 @@ if ( defined $opt_P ) {
         }
 }
 
+$osversion = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select Version from Win32_OperatingSystem\" --namespace=root/CIMV2";
+@resultosversion = split(/\n/,`$osversion`);
+$osversion =  $resultosversion[2];
+
 use Switch;
 switch ($opt_m) {
         case "hyperv" {
 
 
                 #commands
-                $list = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select ElementName, OnTimeInMilliseconds from MSVM_ComputerSystem\" --namespace=root/virtualization";
-                $load = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select LoadPercentage FROM Msvm_processor\" --namespace=root/virtualization";
-                $memory = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select VirtualQuantity FROM Msvm_MemorySettingData\" --namespace=root/virtualization";      
-                $onoff = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select enabledstate from MSVM_ComputerSystem\" --namespace=root/virtualization";
 
+                if ($osversion ge "6.3.0000") {
+                        $list = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select ElementName, OnTimeInMilliseconds from MSVM_ComputerSystem\" --namespace=root/virtualization/V2";
+                        $load = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select LoadPercentage FROM Msvm_processor\" --namespace=root/virtualization/V2";
+                        $memory = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select VirtualQuantity FROM Msvm_MemorySettingData\" --namespace=root/virtualization/V2";
+                        $onoff = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select enabledstate from MSVM_ComputerSystem\" --namespace=root/virtualization/V2";
+                } else {
+
+                        $list = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select ElementName, OnTimeInMilliseconds from MSVM_ComputerSystem\" --namespace=root/virtualization";
+                        $load = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select LoadPercentage FROM Msvm_processor\" --namespace=root/virtualization";
+                        $memory = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select VirtualQuantity FROM Msvm_MemorySettingData\" --namespace=root/virtualization";
+                        $onoff = "wmic -U" . printable($opt_u) . "%" . printable($opt_p) . " //" . $opt_H . " \"Select enabledstate from MSVM_ComputerSystem\" --namespace=root/virtualization";
+                }
                 #Arrays
                 @resultslist = split(/\|/,`$list`);
                 @resultsload = split(/\|/,`$load`);
@@ -187,6 +202,7 @@ switch ($opt_m) {
                         $warning++;            }
 
                         else {$ok++;}
+
                 }
         }
         print "OK: $ok - WARNING: $warning - CRITICAL: $critical\n";
@@ -238,5 +254,4 @@ switch ($opt_m) {
                 else {exit $ERRORS{'OK'};}
         }
 }
-
 
