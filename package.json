@@ -1,7 +1,7 @@
 {
  "name": "hyperv",
  "types": ["pack"],
- "version": "1.0",
+ "version": "1.1",
  "homepage": "https://github.com/ArthurHOUBART/pack_hyperv",
  "repository": "https://github.com/ArthurHOUBART/pack_hyperv",
  "author": "Arthur HOUBART",
